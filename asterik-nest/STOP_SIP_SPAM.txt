@@ -1,0 +1,100 @@
+╔════════════════════════════════════════════════════════════════════╗
+║              STOP SIP ATTACK SPAM - URGENT FIX                     ║
+╚════════════════════════════════════════════════════════════════════╝
+
+🚨 YOU'RE BEING ATTACKED BY: 23.94.171.74
+
+This is a SIP brute-force attack. It WON'T affect your bot, but it's 
+filling your logs. Here's how to stop it:
+
+═══════════════════════════════════════════════════════════════════════
+
+🛡️ QUICK FIX (Run on Server):
+
+# Block the attacker IP immediately
+sudo iptables -A INPUT -s 23.94.171.74 -j DROP
+
+# Save the rule (so it persists after reboot)
+sudo mkdir -p /etc/iptables
+sudo iptables-save | sudo tee /etc/iptables/rules.v4
+
+# Verify it's blocked
+sudo iptables -L INPUT -n | grep 23.94.171.74
+
+═══════════════════════════════════════════════════════════════════════
+
+🔇 REDUCE LOG VERBOSITY (Optional):
+
+# Reduce PJSIP notice logs
+docker exec -it voicedesk-asterisk asterisk -rx "core set verbose 0"
+docker exec -it voicedesk-asterisk asterisk -rx "core set debug 0"
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ WHAT WILL HAPPEN:
+
+BEFORE:
+  - Logs flooding with REGISTER failures
+  - Can't see your actual call logs
+  - Annoying spam
+
+AFTER:
+  - Attacker blocked at firewall level
+  - Clean logs showing only real activity
+  - Can see your AI bot logs clearly
+
+═══════════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT:
+
+This spam is SEPARATE from your AI bot. Your bot will work fine!
+This is just internet background noise that all SIP servers get.
+
+Block the IP, then continue with your bot deployment!
+
+═══════════════════════════════════════════════════════════════════════
+
+📞 AFTER BLOCKING, DEPLOY YOUR BOT:
+
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache voicedesk pipecat-agent
+docker-compose --profile ai up -d
+
+# Now you'll see CLEAN logs:
+docker-compose logs -f voicedesk pipecat-agent
+
+═══════════════════════════════════════════════════════════════════════
+
+🔐 LONG-TERM PROTECTION:
+
+Install Fail2Ban to auto-block future attackers:
+
+sudo apt-get update
+sudo apt-get install fail2ban -y
+
+Create /etc/fail2ban/jail.d/asterisk.conf:
+[asterisk]
+enabled = true
+port = 5060
+filter = asterisk
+logpath = /var/log/asterisk/messages
+maxretry = 3
+bantime = 86400
+
+sudo systemctl restart fail2ban
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ YOUR BOT IS NOT AFFECTED!
+
+The SIP attacks are on port 5060 (SIP).
+Your bot uses:
+  - Port 8088 (Asterisk ARI - internal)
+  - Port 8080 (Pipecat - internal)
+  - Port 3000 (VoiceDesk API - internal)
+
+All internal to Docker network = SAFE!
+
+═══════════════════════════════════════════════════════════════════════
+

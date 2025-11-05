@@ -1,0 +1,30 @@
+📋 FILES TO UPLOAD FOR EXTERNAL MEDIA IMPLEMENTATION
+=========================================================
+
+🆕 NEW FILES (Create these directories and upload):
+1. src/audio/rtp-audio-bridge.service.ts
+2. src/audio/audio.module.ts
+
+🔄 MODIFIED FILES (Replace existing):
+3. src/incoming-calls/incoming-calls.service.ts
+4. src/incoming-calls/incoming-calls.module.ts
+
+=========================================================
+TOTAL: 4 files to upload
+
+🎯 QUICK UPLOAD (from Windows):
+Run: .\UPLOAD_EXTERNAL_MEDIA.ps1
+(Edit SERVER IP first!)
+
+🎯 MANUAL UPLOAD:
+Use WinSCP, FileZilla, or scp command
+
+🎯 AFTER UPLOAD:
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache voicedesk
+docker-compose --profile ai up -d
+docker-compose logs -f voicedesk
+
+✅ Then test with a phone call!
+

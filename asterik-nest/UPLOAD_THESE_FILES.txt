@@ -1,0 +1,56 @@
+===============================================
+FILES TO UPLOAD TO SERVER
+===============================================
+
+MUST UPLOAD (Core functionality):
+----------------------------------
+✅ src/asterisk/asterisk.service.ts
+✅ src/incoming-calls/incoming-calls.service.ts
+✅ deploy-with-streaming.sh
+✅ DEPLOY_NOW.md
+
+OPTIONAL (Documentation only):
+-------------------------------
+⭕ AUDIO_STREAMING_IMPLEMENTATION.md
+⭕ FILES_TO_UPLOAD.md
+
+SKIP THESE (Not used):
+----------------------
+❌ src/incoming-calls/incoming-calls-streaming.service.ts
+❌ src/incoming-calls/audio-stream-bridge.service.ts
+❌ deploy-to-server.ps1 (only for Windows automation)
+
+===============================================
+EASIEST UPLOAD METHOD FROM WINDOWS:
+===============================================
+
+Open PowerShell in: C:\Users\Acer\Desktop\asterisk-project
+
+Run these commands:
+
+# 1. Upload the 2 updated source files
+scp asterik-nest/src/asterisk/asterisk.service.ts nortel@ai-agent-platform:~/asterik-nest/src/asterisk/
+scp asterik-nest/src/incoming-calls/incoming-calls.service.ts nortel@ai-agent-platform:~/asterik-nest/src/incoming-calls/
+
+# 2. Upload deployment script
+scp asterik-nest/deploy-with-streaming.sh nortel@ai-agent-platform:~/asterik-nest/
+scp asterik-nest/DEPLOY_NOW.md nortel@ai-agent-platform:~/asterik-nest/
+
+# 3. SSH to server
+ssh nortel@ai-agent-platform
+
+# 4. On server, run:
+cd ~/asterik-nest
+chmod +x deploy-with-streaming.sh
+./deploy-with-streaming.sh
+
+===============================================
+OR USE THE AUTOMATED SCRIPT:
+===============================================
+
+.\asterik-nest\deploy-to-server.ps1
+
+(This will upload everything and deploy automatically)
+
+===============================================
+

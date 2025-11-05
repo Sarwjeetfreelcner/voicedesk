@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  asterisk:
+    image: andrius/asterisk:18-current
+    container_name: voicedesk-asterisk
+    ports:
+      - "5060:5060/udp"      # SIP
+      - "8088:8088"          # ARI
+      - "10000-10010:10000-10010/udp"  # RTP
+    volumes:
+      - ./asterisk-config:/etc/asterisk
+      - ./asterisk-logs:/var/log/asterisk
+      - ./audio:/var/lib/asterisk/sounds/voicedesk
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    restart: unless-stopped
+
+  voicedesk:
+    build: .
+    container_name: voicedesk-app
+    ports:
+      - "3000:3000"
+    environment:
+      - ASTERISK_ARI_URL=http://asterisk:8088
+      - ASTERISK_ARI_USERNAME=asterisk
+      - ASTERISK_ARI_PASSWORD=asterisk
+      - SIP_TRUNK=voip-provider
+      - CALLER_ID=VoiceDesk
+      - CALLER_ID_NAME=VoiceDesk System
+      - CALLER_ID_NUMBER=1000
+      # AI Conversation (optional - set to 'true' to enable)
+      - ENABLE_AI_CONVERSATION=${ENABLE_AI_CONVERSATION:-false}
+      - PIPECAT_AGENT_URL=${PIPECAT_AGENT_URL:-ws://pipecat-agent:8080}
+    depends_on:
+      - asterisk
+    restart: unless-stopped
+    volumes:
+      - ./voicedesk.db:/app/voicedesk.db
+
+  # Pipecat Agent for AI Conversations (optional)
+  # Uncomment this section and set ENABLE_AI_CONVERSATION=true to enable AI
+  pipecat-agent:
+    build: ../pipecat-agent
+    container_name: pipecat-agent
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - SYSTEM_PROMPT=${SYSTEM_PROMPT:-You are a helpful AI assistant on a phone call. Keep responses VERY brief - one short sentence at a time. Pause after each sentence to let the user respond. This is a real-time conversation, so be concise.}
+      - GREETING_MESSAGE=${GREETING_MESSAGE:-Hello, how can I help you today?}
+      # Admin Dashboard Integration (via Docker host gateway - direct to backend)
+      - ADMIN_API_URL=${ADMIN_API_URL:-http://host.docker.internal:5000/api}
+    command: python app.py
+    restart: unless-stopped
+    profiles:
+      - ai  # Use 'docker-compose --profile ai up' to start with AI
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Allow container to reach host machine
+

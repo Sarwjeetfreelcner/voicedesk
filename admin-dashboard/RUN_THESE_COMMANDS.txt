@@ -1,0 +1,25 @@
+# Copy and paste these commands on your server (ai-agent-platform)
+# One by one or all together
+
+# Stop the incorrectly configured frontend
+pm2 delete voicedesk-admin-ui
+
+# Start frontend with correct port configuration (-p 3000, not -l 3000)
+cd ~/admin-dashboard/frontend
+pm2 start serve --name "voicedesk-admin-ui" -- -s build -p 3000
+
+# Save PM2 configuration
+pm2 save
+
+# Check status
+pm2 status
+
+# View logs to verify it's on port 3000
+pm2 logs voicedesk-admin-ui --lines 10
+
+# You should see: "INFO  Accepting connections at http://localhost:3000"
+
+# Now test in browser: http://195.34.79.69:3000
+
+
+

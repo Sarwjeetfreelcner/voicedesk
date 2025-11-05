@@ -1,0 +1,158 @@
+╔════════════════════════════════════════════════════════════════════╗
+║         🐛 DEBUG: Pipecat Crashing Silently (TX=0)                 ║
+╚════════════════════════════════════════════════════════════════════╝
+
+❌ CURRENT ISSUE:
+
+Pipecat connects but crashes after ~8 seconds with NO audio sent (TX=0)
+and NO error messages in logs.
+
+✅ SOLUTION: Deploy debug version with extensive error logging
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 DEPLOY DEBUG VERSION (3 minutes):
+
+Step 1️⃣ - Upload Files (Windows):
+───────────────────────────────────────────────────────────────────────
+cd C:\Users\Acer\Desktop\asterisk-project
+scp pipecat-agent\bot_asterisk.py nortel@YOUR_SERVER_IP:~/pipecat-agent/
+scp pipecat-agent\app.py nortel@YOUR_SERVER_IP:~/pipecat-agent/
+
+
+Step 2️⃣ - Rebuild (Server):
+───────────────────────────────────────────────────────────────────────
+ssh nortel@YOUR_SERVER_IP
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+
+
+Step 3️⃣ - Watch Logs & Test:
+───────────────────────────────────────────────────────────────────────
+docker-compose logs -f pipecat-agent | grep -E "info|error|✅|❌|💬|📤"
+
+# Make a test call while watching logs
+
+
+Step 4️⃣ - Check API Keys (If No Errors Show):
+───────────────────────────────────────────────────────────────────────
+docker-compose exec pipecat-agent env | grep -E "ELEVENLABS|OPENAI|DEEPGRAM"
+
+# All should show valid keys!
+
+═══════════════════════════════════════════════════════════════════════
+
+🔍 WHAT DEBUG VERSION SHOWS:
+
+BEFORE (Silent Crash):
+───────────────────────────────────────────────────────────────────────
+pipecat-agent | Starting bot for call...
+pipecat-agent | (silence - no error logs)
+pipecat-agent | INFO: connection closed
+voicedesk-app | Stats: RX=358 packets, TX=0 packets
+
+
+AFTER (With Debug Logging):
+───────────────────────────────────────────────────────────────────────
+pipecat-agent | ✅ Created Asterisk serializer
+pipecat-agent | ✅ TTS configured for 8kHz output
+pipecat-agent | ✅ Pipeline created
+pipecat-agent | 🚀 Starting pipeline runner...
+pipecat-agent | 📡 Pipeline runner created, now running task...
+pipecat-agent | 🎤 Asterisk client connected
+pipecat-agent | 💬 Preparing greeting message: Hello! I'm your AI...
+pipecat-agent | 📤 Sending greeting to TTS pipeline...
+
+THEN ONE OF:
+
+SUCCESS:
+  pipecat-agent | ✅ Greeting queued successfully
+  pipecat-agent | 🔊 [Pipecat→Asterisk] First audio frame: 1024 samples
+  voicedesk-app | 🔊 [RTP Bridge] First audio from Pipecat!
+  voicedesk-app | Stats: RX=500, TX=250 packets (TX > 0!)
+
+OR ERROR:
+  pipecat-agent | ❌ Error in on_client_connected: Invalid API key
+  pipecat-agent | Full traceback: ...
+  (Now we know the exact problem!)
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 LIKELY ROOT CAUSES:
+
+1. ❌ Invalid/Missing ElevenLabs API Key
+   → Check: docker-compose exec pipecat-agent env | grep ELEVENLABS_API_KEY
+   → Fix: Set correct key in asterik-nest/.env
+
+2. ❌ Invalid/Missing OpenAI API Key
+   → Check: docker-compose exec pipecat-agent env | grep OPENAI_API_KEY
+   → Fix: Set correct key in asterik-nest/.env
+
+3. ❌ Invalid/Missing Deepgram API Key
+   → Check: docker-compose exec pipecat-agent env | grep DEEPGRAM_API_KEY
+   → Fix: Set correct key in asterik-nest/.env
+
+4. ❌ TTS Rate Limit / Timeout
+   → ElevenLabs may be throttling requests
+   → Check logs for timeout errors
+
+5. ❌ Pipeline Configuration Error
+   → LLMMessagesFrame deprecation causing issues
+   → Will show in debug traceback
+
+═══════════════════════════════════════════════════════════════════════
+
+🧪 TEST API KEYS:
+
+Test ElevenLabs:
+───────────────────────────────────────────────────────────────────────
+docker-compose exec pipecat-agent python3 << 'EOF'
+import os
+from elevenlabs import generate, set_api_key
+try:
+    set_api_key(os.getenv("ELEVENLABS_API_KEY"))
+    audio = generate(text="Test", voice="21m00Tcm4TlvDq8ikWAM", 
+                     model="eleven_turbo_v2_5")
+    print(f"✅ ElevenLabs working! Generated {len(audio)} bytes")
+except Exception as e:
+    print(f"❌ ElevenLabs failed: {e}")
+EOF
+
+
+Test OpenAI:
+───────────────────────────────────────────────────────────────────────
+docker-compose exec pipecat-agent python3 << 'EOF'
+import os
+from openai import OpenAI
+try:
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "Hi"}]
+    )
+    print(f"✅ OpenAI working! Response: {response.choices[0].message.content}")
+except Exception as e:
+    print(f"❌ OpenAI failed: {e}")
+EOF
+
+═══════════════════════════════════════════════════════════════════════
+
+📝 SEND ME DEBUG LOGS:
+
+After deploying and testing, send me:
+
+docker-compose logs --tail=200 pipecat-agent
+
+This will show the EXACT ERROR causing the crash!
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 DEPLOY NOW!
+
+The debug version will catch the silent error and show us exactly
+what's wrong so we can fix it!
+
+═══════════════════════════════════════════════════════════════════════
+

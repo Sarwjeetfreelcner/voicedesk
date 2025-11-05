@@ -1,0 +1,104 @@
+╔════════════════════════════════════════════════════════════════════╗
+║         🔧 FIX TX=0 ISSUE (No Audio from Bot)                      ║
+╚════════════════════════════════════════════════════════════════════╝
+
+❌ PROBLEM: TX=0 packets means Pipecat is NOT sending audio back to caller
+
+✅ SOLUTION: ElevenLabs TTS needs sample_rate=8000 for Asterisk
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 QUICK FIX (2 Minutes):
+
+Step 1️⃣ - On Windows (PowerShell):
+───────────────────────────────────────────────────────────────────────
+cd C:\Users\Acer\Desktop\asterisk-project\asterik-nest
+.\UPLOAD_FIX.ps1
+
+# Or manually:
+scp ..\pipecat-agent\bot_asterisk.py nortel@YOUR_SERVER_IP:~/pipecat-agent/
+
+
+Step 2️⃣ - On Server (SSH):
+───────────────────────────────────────────────────────────────────────
+ssh nortel@YOUR_SERVER_IP
+
+cd ~/asterik-nest
+
+# Rebuild pipecat-agent with the fix
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+
+# Watch for the fix
+docker-compose logs -f pipecat-agent voicedesk
+
+
+Step 3️⃣ - Test Call:
+───────────────────────────────────────────────────────────────────────
+Call your number
+
+You should now:
+  ✅ Hear the greeting: "Hello! I'm your AI assistant..."
+  ✅ See TX > 0 in logs (not TX=0!)
+  ✅ Be able to talk to the AI
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 WHAT TO LOOK FOR IN LOGS:
+
+BEFORE (broken):
+───────────────────────────────────────────────────────────────────────
+pipecat-agent | (no TTS sample_rate log)
+voicedesk-app | 📊 Stats: RX=700, TX=0 packets  ← BAD!
+
+AFTER (fixed):
+───────────────────────────────────────────────────────────────────────
+pipecat-agent | ✅ TTS configured for 8kHz output (Asterisk compatible)
+pipecat-agent | 🔊 Audio output enabled: True
+pipecat-agent | 📡 Serializer active: True
+pipecat-agent | 🔊 [Pipecat→Asterisk] First audio frame: 1024 samples, 8000Hz
+pipecat-agent | 📤 [Pipecat→Asterisk] Sent 50 audio frames
+
+voicedesk-app | 🔊 [RTP Bridge] First audio from Pipecat! 2048 bytes
+voicedesk-app | 📤 [RTP Bridge] Sent RTP packet to Asterisk
+voicedesk-app | 📊 Stats: RX=500, TX=250 packets  ← GOOD!
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 THE FIX (Technical):
+
+File: ~/pipecat-agent/bot_asterisk.py
+
+Changed ElevenLabsTTSService initialization:
+  + sample_rate=8000  # ← This ensures 8kHz audio for Asterisk
+
+Added debug logging:
+  - TTS configuration
+  - Transport audio status
+  - Serializer status
+  - Pipeline flow
+
+═══════════════════════════════════════════════════════════════════════
+
+🔍 IF STILL NOT WORKING:
+
+1. Check ElevenLabs API key:
+   docker-compose exec pipecat-agent env | grep ELEVENLABS_API_KEY
+
+2. Check logs for errors:
+   docker-compose logs pipecat-agent | grep -i error
+
+3. Verify file uploaded:
+   ssh nortel@YOUR_IP "grep 'sample_rate=8000' ~/pipecat-agent/bot_asterisk.py"
+   (Should show the line with sample_rate)
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ THAT'S IT!
+
+This single change (adding sample_rate=8000 to TTS) should fix your TX=0 issue
+and allow you to hear the AI bot!
+
+═══════════════════════════════════════════════════════════════════════
+

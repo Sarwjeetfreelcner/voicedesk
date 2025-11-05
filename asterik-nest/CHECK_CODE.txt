@@ -1,0 +1,31 @@
+🔍 VERIFY YOUR PIPECAT FILES ARE CORRECT
+==========================================
+
+Run this on your server to verify the files have the new code:
+
+cd ~
+bash asterik-nest/VERIFY_FILES.sh
+
+
+This will check if bot_asterisk.py has:
+✅ Debug log messages
+✅ NumPy import
+✅ sample_rate=8000 for ElevenLabs
+✅ type() method in serializer
+
+IMPORTANT:
+----------
+If the output shows "0" or doesn't find the strings, it means 
+the files in ~/pipecat-agent/ are NOT updated!
+
+In that case, you need to UPLOAD the files again to ~/pipecat-agent/
+(not ~/asterik-nest/pipecat-agent)
+
+
+After verification, if files are correct, try one more rebuild:
+---------------------------------------------------------------
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+docker-compose logs -f pipecat-agent

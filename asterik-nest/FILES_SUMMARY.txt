@@ -1,0 +1,86 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          FILES TO UPLOAD - EXTERNAL MEDIA WITH LOGGING             ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📦 TOTAL: 4 Files
+
+═══════════════════════════════════════════════════════════════════════
+
+🆕 NEW FILES (2):
+
+1. src/audio/rtp-audio-bridge.service.ts
+   └─ Create directory: mkdir -p ~/asterik-nest/src/audio
+   └─ Upload to: ~/asterik-nest/src/audio/
+   └─ Contains: RTP ↔ WebSocket audio bridge with detailed logging
+
+2. src/audio/audio.module.ts
+   └─ Upload to: ~/asterik-nest/src/audio/
+   └─ Contains: NestJS module configuration
+
+═══════════════════════════════════════════════════════════════════════
+
+🔄 MODIFIED FILES (2):
+
+3. src/incoming-calls/incoming-calls.service.ts
+   └─ Upload to: ~/asterik-nest/src/incoming-calls/
+   └─ Changes: Added External Media flow with 7-step logging
+
+4. src/incoming-calls/incoming-calls.module.ts
+   └─ Upload to: ~/asterik-nest/src/incoming-calls/
+   └─ Changes: Added AudioModule import
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 QUICK DEPLOY:
+
+# Create directory
+ssh nortel@YOUR_SERVER "mkdir -p ~/asterik-nest/src/audio"
+
+# Upload files (adjust path if needed)
+scp src/audio/* nortel@YOUR_SERVER:~/asterik-nest/src/audio/
+scp src/incoming-calls/incoming-calls.service.ts nortel@YOUR_SERVER:~/asterik-nest/src/incoming-calls/
+scp src/incoming-calls/incoming-calls.module.ts nortel@YOUR_SERVER:~/asterik-nest/src/incoming-calls/
+
+# Rebuild on server
+ssh nortel@YOUR_SERVER
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache voicedesk
+docker-compose --profile ai up -d
+docker-compose logs -f voicedesk
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ WHAT TO EXPECT IN LOGS:
+
+🚀 [AI Call] Starting AI conversation...
+✅ [AI Call] Step 1/7 Complete: Connected to Pipecat
+✅ [AI Call] Step 2/7 Complete: RTP bridge created
+✅ [AI Call] Step 3/7 Complete: Asterisk bridge created
+✅ [AI Call] Step 4/7 Complete: Caller added to bridge
+✅ [AI Call] Step 5/7 Complete: External Media created
+✅ [AI Call] Step 6/7 Complete: External Media added to bridge
+🎉 [AI Call] *** AUDIO PIPELINE READY ***
+✅ [AI Call] Step 7/7 Complete: Call monitoring started
+📞 [AI Call] AI conversation is now active - speak to the AI!
+
+🎤 [RTP Bridge] First packet received! Asterisk RTP endpoint: X.X.X.X:XXXXX
+📡 [RTP Bridge] First audio packet sent to Pipecat via WebSocket
+🔊 [RTP Bridge] First audio received from Pipecat
+📤 [RTP Bridge] First RTP packet sent to Asterisk successfully!
+
+📊 [RTP Bridge] Stats: RX=100 packets, TX=100 packets
+📊 [RTP Bridge] Stats: RX=200 packets, TX=200 packets
+
+═══════════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION:
+
+- README_DEPLOY_NOW.md         → Quick start guide
+- UPLOAD_FILES_WITH_LOGS.md    → Detailed upload instructions
+- IMPLEMENTATION_COMPLETE.md   → Full technical details
+- DEPLOY_EXTERNAL_MEDIA.md     → Deployment guide
+- FILES_SUMMARY.txt            → This file
+
+═══════════════════════════════════════════════════════════════════════
+

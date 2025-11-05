@@ -1,0 +1,25 @@
+🔧 FIX: AudioRawFrame pts Attribute
+====================================
+
+NEW ERROR:
+----------
+AttributeError: 'AudioRawFrame' object has no attribute 'pts'
+
+FIX:
+----
+Added pts = None to deserialized AudioRawFrame.
+pts = presentation timestamp (None for real-time audio)
+
+UPLOAD & REBUILD:
+-----------------
+scp pipecat-agent/bot_asterisk.py nortel@YOUR_IP:~/pipecat-agent/bot_asterisk.py
+
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker rmi asterik-nest-pipecat-agent
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+docker-compose logs -f pipecat-agent
+
+HOPEFULLY THE LAST FIX!
+

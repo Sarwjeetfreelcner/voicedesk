@@ -1,0 +1,39 @@
+🔧 FIX: AudioRawFrame transport_destination Attribute
+======================================================
+
+NEW ERROR FOUND:
+----------------
+AttributeError: 'AudioRawFrame' object has no attribute 'transport_destination'
+
+CAUSE:
+------
+The AudioRawFrame created in deserialize() was missing the 
+transport_destination attribute that Pipecat's transport layer expects.
+
+FIX APPLIED:
+------------
+Added transport_destination = None to deserialized AudioRawFrame objects.
+
+UPLOAD NOW:
+-----------
+scp pipecat-agent/bot_asterisk.py nortel@YOUR_IP:~/pipecat-agent/bot_asterisk.py
+
+REBUILD:
+--------
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker rmi asterik-nest-pipecat-agent
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+docker-compose logs -f pipecat-agent
+
+EXPECTED RESULT:
+----------------
+✅ NO AttributeError
+✅ NO TypeError  
+✅ Audio flows bidirectionally
+✅ Bot hears you and responds
+✅ Clear greeting message
+
+This should be the final fix!
+

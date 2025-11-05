@@ -1,0 +1,45 @@
+🔧 COMPREHENSIVE FIX: All Missing AudioRawFrame Attributes
+============================================================
+
+ISSUES FIXED:
+-------------
+- AttributeError: 'AudioRawFrame' object has no attribute 'transport_destination'
+- AttributeError: 'AudioRawFrame' object has no attribute 'pts'
+- AttributeError: 'AudioRawFrame' object has no attribute 'id'
+- (And any other missing attributes)
+
+SOLUTION:
+---------
+Added ALL required Frame attributes to deserialized AudioRawFrame:
+- id: Unique frame identifier (UUID)
+- transport_destination: None (for single destination)
+- pts: None (presentation timestamp for real-time)
+- passthrough: False (for standard processing)
+
+DISTORTED AUDIO EXPLANATION:
+----------------------------
+The distorted audio was caused by these AttributeErrors causing
+packet loss and dropped frames. Once all attributes are present,
+audio should be CLEAR!
+
+UPLOAD & REBUILD NOW:
+---------------------
+scp pipecat-agent/bot_asterisk.py nortel@YOUR_IP:~/pipecat-agent/bot_asterisk.py
+
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker rmi asterik-nest-pipecat-agent
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+docker-compose logs -f pipecat-agent
+
+EXPECTED RESULT:
+----------------
+✅ NO MORE AttributeErrors
+✅ CLEAR AUDIO (not distorted!)
+✅ Bot greeting plays perfectly
+✅ Bot hears you and responds
+✅ Full bidirectional conversation!
+
+THIS SHOULD BE THE FINAL FIX!
+

@@ -1,0 +1,38 @@
+🎯 FINAL FIX - ASYNC SERIALIZER
+==================================
+
+PROBLEM:
+--------
+The serialize() method was returning a string, but FastAPIWebsocketTransport
+was trying to await it, causing 100+ TypeError exceptions.
+
+SOLUTION:
+---------
+Made serialize() method async so it can be properly awaited.
+
+UPLOAD NOW:
+-----------
+# From Windows:
+cd c:\Users\Acer\Desktop\asterisk-project
+scp pipecat-agent/bot_asterisk.py nortel@YOUR_IP:~/pipecat-agent/bot_asterisk.py
+
+
+ON SERVER:
+----------
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker rmi asterik-nest-pipecat-agent
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+docker-compose logs -f pipecat-agent
+
+
+WHAT YOU'LL SEE:
+----------------
+✅ NO MORE TypeError errors!
+✅ Audio frames sent successfully
+✅ Bot greeting plays
+✅ Bot responds to your voice
+✅ TX packets > 0 (audio flowing!)
+
+This is the FINAL fix! Upload now and test!

@@ -1,0 +1,72 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                    CRITICAL FIX - UPLOAD NOW                       ║
+╚════════════════════════════════════════════════════════════════════╝
+
+🐛 ISSUE FOUND IN YOUR LOGS:
+- External Media channels creating infinite loop
+- Pipecat receiving audio BUT NOT sending back (TX=0)
+
+✅ FIXES APPLIED:
+1. Filter out External Media channels to prevent loop
+2. Add delay before bridge connection
+3. Enhanced logging to debug audio issue
+
+═══════════════════════════════════════════════════════════════════════
+
+📦 FILES TO UPLOAD (2):
+
+1. src/incoming-calls/incoming-calls.service.ts
+2. src/audio/rtp-audio-bridge.service.ts
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 QUICK DEPLOY:
+
+scp src/incoming-calls/incoming-calls.service.ts nortel@YOUR_SERVER:~/asterik-nest/src/incoming-calls/
+scp src/audio/rtp-audio-bridge.service.ts nortel@YOUR_SERVER:~/asterik-nest/src/audio/
+
+ssh nortel@YOUR_SERVER
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker-compose --profile ai build --no-cache voicedesk
+docker-compose --profile ai up -d
+docker-compose logs -f voicedesk | grep -E "\[AI Call\]|\[RTP Bridge\]"
+
+═══════════════════════════════════════════════════════════════════════
+
+✅ WHAT TO EXPECT:
+
+GOOD (Fixed):
+- No more "Handling incoming call from Unknown" 
+- No more "Channel not in Stasis application" errors
+- External Media channels are ignored: "🚫 Ignoring External Media/system channel"
+
+STILL NEED TO DEBUG:
+- Check if TX packets increase (not staying at 0)
+- Check Pipecat logs for audio generation
+- Verify ElevenLabs is working
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 AFTER DEPLOYMENT:
+
+1. Make a test call
+2. Watch logs carefully
+3. Look for:
+   ✅ "🚫 Ignoring External Media/system channel"
+   ✅ No loop/nested channels
+   ⚠️  TX packets value (should NOT be 0!)
+   
+4. Send me logs of:
+   - voicedesk-app logs
+   - pipecat-agent logs
+   - Specifically the RTP Stats lines
+
+═══════════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION:
+- CRITICAL_FIX.md → Detailed explanation
+- This file → Quick reference
+
+═══════════════════════════════════════════════════════════════════════
+

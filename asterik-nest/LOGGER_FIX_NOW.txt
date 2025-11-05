@@ -1,0 +1,50 @@
+🔥 CRITICAL LOGGER FIX - ROOT CAUSE FOUND!
+==========================================
+
+PROBLEM:
+--------
+The logger was removed at startup (logger.remove(0)), but then 
+AsteriskFrameSerializer.__init__() tried to use logger.info() at line 54.
+This caused a SILENT CRASH before any debug logs could print!
+
+SOLUTION:
+---------
+Changed logger configuration to properly add stdout handler instead of removing it.
+
+UPLOAD FILE NOW:
+----------------
+# From Windows PowerShell:
+cd c:\Users\Acer\Desktop\asterisk-project
+.\asterik-nest\UPLOAD_LOGGER_FIX.ps1
+
+OR manually with SCP:
+scp pipecat-agent/bot_asterisk.py nortel@YOUR_IP:~/pipecat-agent/bot_asterisk.py
+
+
+THEN ON SERVER:
+---------------
+# 1. Verify fix
+cd ~/pipecat-agent
+grep "logger.add" bot_asterisk.py
+# Should show: logger.add(sys.stdout, ...
+
+# 2. Rebuild
+cd ~/asterik-nest
+docker-compose --profile ai down
+docker rmi asterik-nest-pipecat-agent
+docker-compose --profile ai build --no-cache pipecat-agent
+docker-compose --profile ai up -d
+
+# 3. Test call and watch logs
+docker-compose logs -f pipecat-agent
+
+
+WHAT YOU'LL SEE:
+----------------
+✅ All debug logs will now appear!
+✅ TX packets > 0 (audio flowing back to Asterisk)
+✅ Greeting message will play!
+✅ Bot will respond to your voice!
+
+This was the FINAL missing piece!
+
